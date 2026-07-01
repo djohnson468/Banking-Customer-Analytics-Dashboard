@@ -38,3 +38,6 @@ The final project is an interactive Tableau dashboard designed to summarize key 
 ## Interactive Dashboard
 [View the Interactive Tableau Dashboard](https://public.tableau.com/app/profile/d.asia.johnson/viz/Banking_Customer_Analytics_Dashboard/BankingCustomerAnalyticsDashboard?publish=yes)
 
+## Dataset
+Dataset obtained from: [Banking-Dataset](https://github.com/ahsan084/Banking-Dataset)
+All rights and licensing belong to the original dataset creator.
