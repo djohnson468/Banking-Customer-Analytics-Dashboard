@@ -36,5 +36,5 @@ The final project is an interactive Tableau dashboard designed to summarize key 
 <img width="1919" height="1045" alt="Banking_Analytics_Dashboard_Preview" src="https://github.com/user-attachments/assets/9386897e-9173-4055-9954-c206b1596901" />
 
 ## Interactive Dashboard
-https://public.tableau.com/app/profile/d.asia.johnson/viz/Banking_Customer_Analytics_Dashboard/BankingCustomerAnalyticsDashboard?publish=yes
+[View the Interactive Tableau Dashboard](https://public.tableau.com/app/profile/d.asia.johnson/viz/Banking_Customer_Analytics_Dashboard/BankingCustomerAnalyticsDashboard?publish=yes)
 
