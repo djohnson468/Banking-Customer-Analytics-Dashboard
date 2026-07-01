@@ -1,0 +1,262 @@
+/*
+======================================================================
+Banking Customer Analysis
+======================================================================
+
+Project Goals:
+-Clean and validate banking customer data
+-Explore customer demographics
+-Analyze account balances
+-Analyze loans and credit cards
+-Answer business questions using SQL
+
+Skills Demonstrated:
+- SELECT
+- DISNTINCT
+- COUNT 
+- AVG
+- SUM
+- GROUP BY
+- ORDER BY
+- LIMIT
+- CASE 
+- Subqueries
+- RANK()
+======================================================================
+*/
+
+SELECT COUNT(*) AS Total_Customers 
+FROM banking_customer_analysis.comprehensive_banking_database;
+
+SELECT *
+FROM banking_customer_analysis.comprehensive_banking_database
+LIMIT 10;
+
+SELECT DISTINCT `Account Type`
+FROM banking_customer_analysis.comprehensive_banking_database;
+
+SELECT DISTINCT `Loan Type`
+FROM banking_customer_analysis.comprehensive_banking_database;
+
+SELECT DISTINCT `Card Type`
+FROM banking_customer_analysis.comprehensive_banking_database;
+
+-- Data Cleaning 
+
+-- Checking for NULL values 
+
+SELECT *
+FROM banking_customer_analysis.comprehensive_banking_database
+WHERE `Email` IS NULL
+
+-- Check for duplicate Customer IDs
+
+SELECT `Customer ID`,
+COUNT(*)
+FROM banking_customer_analysis.comprehensive_banking_database
+GROUP BY `Customer ID`
+HAVING COUNT(*) > 1;
+
+-- Verify Account Types
+
+SELECT DISTINCT `Account Type`
+FROM banking_customer_analysis.comprehensive_banking_database;
+
+-- Verify date formats
+
+SELECT `Date of Account Opening`
+FROM banking_customer_analysis.comprehensive_banking_database
+LIMIT 10;
+
+SHOW COLUMNS 
+FROM banking_customer_analysis.comprehensive_banking_database; 
+
+/* Questions Derived from Data Exploration */
+
+-- 1) How many customers are in the database?
+
+SELECT COUNT(*) AS Total_Customers 
+FROM banking_customer_analysis.comprehensive_banking_database;
+
+-- 2) What account types do our customers have?
+
+SELECT DISTINCT `Account Type`
+FROM banking_customer_analysis.comprehensive_banking_database;
+
+-- 3) How many customers belong to each account type?
+
+SELECT `Account Type`,
+COUNT(*) 
+FROM banking_customer_analysis.comprehensive_banking_database
+GROUP BY `Account Type`;
+
+-- 4) What is the average account balance for each account type?
+
+SELECT `Account Type`,
+AVG(`Account Balance`) AS avg_account_balance
+FROM banking_customer_analysis.comprehensive_banking_database
+GROUP BY `Account Type`;
+
+-- 5) Which 10 cities have the largest customer base?
+
+SELECT `City`,
+COUNT(*) 
+FROM banking_customer_analysis.comprehensive_banking_database
+GROUP BY `City`
+ORDER BY `COUNT(*)` DESC
+LIMIT 10;
+
+-- 6) What is the average customer age by gender?
+
+SELECT `Gender`, 
+AVG(`Age`) AS Average_age
+FROM banking_customer_analysis.comprehensive_banking_database
+GROUP BY `Gender`;
+
+-- 7) Which transaction type occurs the most frequently?
+
+SELECT `Transaction Type`,
+COUNT(`Transaction Type`)
+FROM banking_customer_analysis.comprehensive_banking_database
+GROUP BY `Transaction Type`
+ORDER BY COUNT(`Transaction Type`) DESC; 
+
+-- 8) Which loan type has the highest average loan amount?
+
+SELECT `Loan Type`,
+AVG(`Loan Amount`)
+FROM banking_customer_analysis.comprehensive_banking_database
+GROUP BY `Loan Type`
+ORDER BY AVG(`Loan Amount`) DESC;
+
+-- 9) Which credit card type has the highest average credit limit?
+
+SELECT `Card Type`,
+AVG(`Credit Limit`)
+FROM banking_customer_analysis.comprehensive_banking_database
+GROUP BY `Card Type`
+ORDER BY AVG(`Credit Limit`) DESC;
+
+-- 10) Create age groups and determine the average account balance for each group?
+
+SELECT
+CASE
+	WHEN `Age` BETWEEN 18 AND 25 THEN '18-25'
+    WHEN `Age` BETWEEN 26 AND 44 THEN '26-44'
+    WHEN `Age` BETWEEN 45 AND 59 THEN '45-59'
+    ELSE '60+'
+END AS Age_Group, AVG(`Account Balance`) AS Average_Account_Balance
+FROM banking_customer_analysis.comprehensive_banking_database
+GROUP BY Age_Group;
+
+-- 11) Find all customers whose account balance is above the overall average account balance.
+
+SELECT `Customer ID`, `First Name`, `Last Name`, `Account Balance`
+FROM banking_customer_analysis.comprehensive_banking_database
+WHERE `Account Balance` > 
+(
+	SELECT AVG(`Account Balance`)
+	FROM banking_customer_analysis.comprehensive_banking_database
+);
+
+-- 12) Rank customers from highest to lowest account balance.
+
+SELECT `Customer ID`, `First Name`, `Last Name`, `Account Balance`,
+RANK() OVER(
+	ORDER BY `Account Balance` DESC
+) AS Balance_Rank
+FROM banking_customer_analysis.comprehensive_banking_database;
+    
+
+-- 13) Rank cities by their average account balance.
+
+SELECT `City`, AVG(`Account Balance`) AS Average_Balance
+FROM banking_customer_analysis.comprehensive_banking_database
+GROUP BY `City`;
+
+-- 14) Find customers whose loan amount is greater than the average loan amount for their loan type.
+
+SELECT `Customer ID`, `First Name`, `Last Name`, `Loan Amount`, `Loan Type`
+FROM banking_customer_analysis.comprehensive_banking_database AS L_amt
+WHERE L_amt.`Loan Amount` > 
+(
+	SELECT AVG(Avg_l_amt.`Loan Amount`)
+	FROM banking_customer_analysis.comprehensive_banking_database AS Avg_l_amt
+    WHERE L_amt.`Loan Type` = Avg_l_amt.`Loan Type`
+);
+
+-- 15) Which account type has the greatest total amount of money held by customers?
+
+SELECT `Account Type`, SUM(`Account Balance`) AS Total_Amount
+FROM banking_customer_analysis.comprehensive_banking_database
+GROUP BY `Account Type`
+ORDER BY SUM(`Account Balance`) DESC
+LIMIT 1; 
+
+-- 16) How many accounts were opened each year?
+
+SELECT 
+	YEAR(STR_TO_DATE(`Date Of Account Opening`, '%m/%d/%Y')) AS Opening_Year,
+    COUNT(*) AS Accounts_Opened
+FROM banking_customer_analysis.comprehensive_banking_database
+GROUP BY Opening_Year
+ORDER BY Opening_Year;
+
+-- 17) Identify the top 5 customers with the highest reward points.
+
+SELECT `Customer ID`, `First Name`, `Last Name`, `Rewards Points`
+FROM banking_customer_analysis.comprehensive_banking_database
+ORDER BY `Rewards Points` DESC
+LIMIT 5;
+
+-- 18) Which branch has the highest average account balance?
+
+SELECT `Branch ID`,
+AVG(`Account Balance`) AS Average_Balance
+FROM banking_customer_analysis.comprehensive_banking_database
+GROUP BY `Branch ID`
+ORDER BY AVG(`Account Balance`) DESC
+LIMIT 1;
+
+-- 19) For each city, identify the customer with the highest account balance.
+
+SELECT *
+FROM
+(
+	SELECT `City`, 
+    `Customer ID`, 
+    `First Name`, 
+    `Last Name`, 
+    `Account Balance`,
+    ROW_NUMBER() OVER(
+		PARTITION BY `City`
+        ORDER BY `Account Balance` DESC
+    ) AS Balance_Rank    
+FROM banking_customer_analysis.comprehensive_banking_database
+) RankedCustomers 
+WHERE Balance_Rank = 1;
+
+-- 20) Create an executive summary that includes: Total customers, average account balance, average loan amount,
+-- average customer age, total reward points, number of current accounts, number of savings accounts
+
+ SELECT
+	COUNT(*) AS Total_Customers,
+    AVG(`Account Balance`) AS Average_Account_Balance,
+    AVG(`Loan Amount`) AS Average_Loan_Amount,
+    AVG(`Age`) AS Average_Age,
+    SUM(`Rewards Points`) AS Total_Rewards_Points,
+    SUM(
+		CASE 
+			WHEN `Account Type` = 'Current' THEN 1
+            ELSE 0
+        END
+    ) AS Current_Accounts,
+    
+	SUM(
+		CASE 
+			WHEN `Account Type` = 'Savings' THEN 1
+            ELSE 0
+        END
+    ) AS Savings_Accounts 
+
+FROM banking_customer_analysis.comprehensive_banking_database;
